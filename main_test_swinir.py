@@ -58,9 +58,9 @@ def main():
 
     for idx, path in enumerate(sorted(glob.glob(os.path.join(folder, '*')))):
         # read image
-        imgname, img_lq, img_gt = get_image_pair(args, path)  # image to HWC-BGR, float32
-        img_lq = np.transpose(img_lq if img_lq.shape[2] == 1 else img_lq[:, :, [2, 1, 0]], (2, 0, 1))  # HCW-BGR to CHW-RGB
-        img_lq = torch.from_numpy(img_lq).float().unsqueeze(0).to(device)  # CHW-RGB to NCHW-RGB
+        imgname, img_lq, img_gt = get_image_pair(args, path)  # image to HWC-BGR, float32[0, 1]
+        img_lq = np.transpose(img_lq if img_lq.shape[2] == 1 else img_lq[:, :, [2, 1, 0]], (2, 0, 1))  # CHW-RGB, float32[0, 1]
+        img_lq = torch.from_numpy(img_lq).float().unsqueeze(0).to(device)  # NCHW-RGB, float32[0, 1]
 
         # inference
         with torch.no_grad():
@@ -74,15 +74,15 @@ def main():
             output = output[..., :h_old * args.scale, :w_old * args.scale]
 
         # save image
-        output = output.data.squeeze().float().cpu().clamp_(0, 1).numpy()
+        output = output.data.squeeze().float().cpu().clamp_(0, 1).numpy()  # CHW-RGB, float32[0, 1]
         if output.ndim == 3:
-            output = np.transpose(output[[2, 1, 0], :, :], (1, 2, 0))  # CHW-RGB to HCW-BGR
-        output = (output * 255.0).round().astype(np.uint8)  # float32 to uint8
+            output = np.transpose(output[[2, 1, 0], :, :], (1, 2, 0))  # HCW-BGR, float32[0, 1]
+        output = (output * 255.0).round().astype(np.uint8)  # HCW-BGR, uint8[0, 255]
         cv2.imwrite(f'{save_dir}/{imgname}_SwinIR.png', output)
 
         # evaluate psnr/ssim/psnr_b
         if img_gt is not None:
-            img_gt = (img_gt * 255.0).round().astype(np.uint8)  # float32 to uint8
+            img_gt = (img_gt * 255.0).round().astype(np.uint8)  # HWC-BGR, uint8[0, 255]
             img_gt = img_gt[:h_old * args.scale, :w_old * args.scale, ...]  # crop gt
             img_gt = np.squeeze(img_gt)
 
