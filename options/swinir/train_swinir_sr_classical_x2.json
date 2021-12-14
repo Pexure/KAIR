@@ -17,8 +17,8 @@
     "train": {
       "name": "train_dataset"           // just name
       , "dataset_type": "sr"         // "dncnn" | "dnpatch" | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch" | "jpeg"
-      , "dataroot_H": "trainsets/trainH"// path of H training dataset. DIV2K (800 training images)
-      , "dataroot_L": "trainsets/trainL"              // path of L training dataset
+      , "dataroot_H": "/mnt/cfs/algorithm/public_data/SR/DIV2K/DIV2K_train_HR_sub"
+      , "dataroot_L": "/mnt/cfs/algorithm/public_data/SR/DIV2K/DIV2K_train_LR_bicubic/X2_sub"
 
       , "H_size": 96                   // 96/144|192/384 | 128/192/256/512. LR patch size is set to 48 or 64 when compared with RCAN or RRDB.
 
@@ -29,8 +29,8 @@
     , "test": {
       "name": "test_dataset"            // just name
       , "dataset_type": "sr"         // "dncnn" | "dnpatch" | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch" | "jpeg"
-      , "dataroot_H": "testsets/Set5/HR"  // path of H testing dataset
-      , "dataroot_L": "testsets/Set5/LR_bicubic/X2"              // path of L testing dataset
+      , "dataroot_H": "/mnt/cfs/algorithm/public_data/SR/test/Set5/GTmod12"
+      , "dataroot_L": "/mnt/cfs/algorithm/public_data/SR/test/Set5/LRbicx2"
 
     }
   }
@@ -75,7 +75,7 @@
     , "E_param_strict": true
 
     , "checkpoint_test": 5000           // for testing
-    , "checkpoint_save": 5000           // for saving model
+    , "checkpoint_save": 50000           // for saving model
     , "checkpoint_print": 200           // for print
   }
 }
