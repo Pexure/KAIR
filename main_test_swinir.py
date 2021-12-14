@@ -61,7 +61,7 @@ def main():
         # read image
         imgname, img_lq, img_gt = get_image_pair(args, path)  # image to HWC-BGR, float32[0, 1]
         img_lq = np.transpose(img_lq if img_lq.shape[2] == 1 else img_lq[:, :, [2, 1, 0]], (2, 0, 1))  # CHW-RGB, float32[0, 1]
-        img_lq = torch.from_numpy(img_lq).float().unsqueeze(0).to(device)  # NCHW-RGB, float32[0, 1]
+        img_lq = torch.from_numpy(img_lq).float().unsqueeze(0).to(device)  # 1CHW-RGB, float32[0, 1]
 
         # inference
         with torch.no_grad():

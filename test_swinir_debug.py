@@ -127,6 +127,8 @@ def main(json_path='options/train_msrresnet_psnr.json'):
         # -----------------------
         # calculate PSNR
         # -----------------------
+        E_img = E_img[:, :, [2, 1, 0]]
+        H_img = H_img[:, :, [2, 1, 0]]
         E_img = util.bgr2ycbcr(E_img.astype(np.float32) / 255.) * 255.
         H_img = util.bgr2ycbcr(H_img.astype(np.float32) / 255.) * 255.
         current_psnry = util.calculate_psnr(E_img, H_img, border=border)
