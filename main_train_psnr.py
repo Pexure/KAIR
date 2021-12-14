@@ -222,19 +222,20 @@ def main(json_path='options/train_msrresnet_psnr.json'):
                     model.test()
 
                     visuals = model.current_visuals()
-                    E_img = util.tensor2uint(visuals['E'])
-                    H_img = util.tensor2uint(visuals['H'])
+                    E_img = util.tensor2uint(visuals['E'])  # E_img: HWC-RGB, uint8[0, 255]
+                    H_img = util.tensor2uint(visuals['H'])  # H_img: HWC-RGB, uint8[0, 255]
 
                     # -----------------------
                     # save estimated image E
                     # -----------------------
                     save_img_path = os.path.join(img_dir, '{:s}_{:d}.png'.format(img_name, current_step))
-                    util.imsave(E_img, save_img_path)
+                    util.imsave(E_img, save_img_path)  # has no effect on E_img
 
                     # -----------------------
                     # calculate PSNR
                     # -----------------------
-                    # current_psnr = util.calculate_psnr(E_img, H_img, border=border)
+                    E_img = E_img[:, :, [2, 1, 0]]  # copy; do not share memory
+                    H_img = H_img[:, :, [2, 1, 0]]
                     E_img = util.bgr2ycbcr(E_img.astype(np.float32) / 255.) * 255.
                     H_img = util.bgr2ycbcr(H_img.astype(np.float32) / 255.) * 255.
                     current_psnry = util.calculate_psnr(E_img, H_img, border=border)

@@ -101,6 +101,8 @@ def main(json_path='options/train_msrresnet_psnr.json'):
     # -------------------------------
     avg_psnr = 0.0
     avg_ssim = 0.0
+    avg_psnry = 0.0
+    avg_ssimy = 0.0
     idx = 0
 
     for test_data in test_loader:
@@ -122,13 +124,17 @@ def main(json_path='options/train_msrresnet_psnr.json'):
         # save estimated image E
         # -----------------------
         save_img_path = os.path.join(img_dir, '{:s}_{:d}.png'.format(img_name, current_step))
-        util.imsave(E_img, save_img_path)  # E_img: HWC-BGR, uint8[0, 255]
+        util.imsave(E_img, save_img_path)  # has no effect on E_img
 
         # -----------------------
         # calculate PSNR
         # -----------------------
-        E_img = E_img[:, :, [2, 1, 0]]
-        H_img = H_img[:, :, [2, 1, 0]]
+        E_img = E_img[:, :, [2, 1, 0]]  # HWC-BGR; make a copy, do not share memory
+        H_img = H_img[:, :, [2, 1, 0]]  # HWC-BGR;
+
+        current_psnr = util.calculate_psnr(E_img, H_img, border=border)
+        current_ssim = util.calculate_ssim(E_img, H_img, border=border)
+
         E_img = util.bgr2ycbcr(E_img.astype(np.float32) / 255.) * 255.
         H_img = util.bgr2ycbcr(H_img.astype(np.float32) / 255.) * 255.
         current_psnry = util.calculate_psnr(E_img, H_img, border=border)
@@ -137,15 +143,21 @@ def main(json_path='options/train_msrresnet_psnr.json'):
         print('PNSR_Y: {:->4d}--> {:>10s} | {:<4.2f}dB'.format(idx, image_name_ext, current_psnry))
         print('SSIM_Y: {:->4d}--> {:>10s} | {:<4.4f}dB'.format(idx, image_name_ext, current_ssimy))
 
-        avg_psnr += current_psnry
-        avg_ssim += current_ssimy
+        avg_psnr += current_psnr
+        avg_ssim += current_ssim
+        avg_psnry += current_psnry
+        avg_ssimy += current_ssimy
 
     avg_psnr = avg_psnr / idx
     avg_ssim = avg_ssim / idx
+    avg_psnry = avg_psnry / idx
+    avg_ssimy = avg_ssimy / idx
 
     # testing log
-    print('<epoch:{:3d}, iter:{:8,d}, Average PSNR_Y : {:<.2f}dB\n'.format(0, current_step, avg_psnr))
-    print('<epoch:{:3d}, iter:{:8,d}, Average SSIM_Y : {:<.4f}dB\n'.format(0, current_step, avg_ssim))
+    print('<epoch:{:3d}, iter:{:8,d}, Average PSNR : {:<.2f}dB\n'.format(0, current_step, avg_psnr))
+    print('<epoch:{:3d}, iter:{:8,d}, Average SSIM : {:<.4f}dB\n'.format(0, current_step, avg_ssim))
+    print('<epoch:{:3d}, iter:{:8,d}, Average PSNR_Y : {:<.2f}dB\n'.format(0, current_step, avg_psnry))
+    print('<epoch:{:3d}, iter:{:8,d}, Average SSIM_Y : {:<.4f}dB\n'.format(0, current_step, avg_ssimy))
 
 
 if __name__ == '__main__':
