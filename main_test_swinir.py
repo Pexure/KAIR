@@ -5,6 +5,7 @@ import numpy as np
 from collections import OrderedDict
 import os
 import torch
+import torch.nn.functional as F
 import requests
 
 from models.network_swinir import SwinIR as net
@@ -68,6 +69,7 @@ def main():
             _, _, h_old, w_old = img_lq.size()
             h_pad = (h_old // window_size + 1) * window_size - h_old
             w_pad = (w_old // window_size + 1) * window_size - w_old
+            # F.pad(img_lq, (0, h_pad, 0, w_pad), 'reflect')
             # img_lq = torch.cat([img_lq, torch.flip(img_lq, [2])], 2)[:, :, :h_old + h_pad, :]
             # img_lq = torch.cat([img_lq, torch.flip(img_lq, [3])], 3)[:, :, :, :w_old + w_pad]
             output = test(img_lq, model, args, window_size)
