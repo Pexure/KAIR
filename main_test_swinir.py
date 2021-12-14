@@ -102,8 +102,6 @@ def main(json_path='options/train_msrresnet_psnr.json'):
             test_loader = DataLoader(test_set, batch_size=1,
                                      shuffle=False, num_workers=1,
                                      drop_last=False, pin_memory=True)
-        else:
-            raise NotImplementedError("Phase [%s] is not recognized." % phase)
 
     '''
     # ----------------------------------------
