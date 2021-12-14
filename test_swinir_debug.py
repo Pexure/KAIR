@@ -41,8 +41,6 @@ def main(json_path='options/train_msrresnet_psnr.json'):
     # ----------------------------------------
     # distributed settings
     # ----------------------------------------
-    if opt['dist']:
-        init_dist('pytorch')
     opt['rank'], opt['world_size'] = get_dist_info()
     
     if opt['rank'] == 0:
@@ -51,7 +49,6 @@ def main(json_path='options/train_msrresnet_psnr.json'):
     # ----------------------------------------
     # update opt
     # ----------------------------------------
-    # -->-->-->-->-->-->-->-->-->-->-->-->-->-
     init_iter_G, init_path_G = option.find_last_checkpoint(opt['path']['models'], net_type='G')
     init_iter_E, init_path_E = option.find_last_checkpoint(opt['path']['models'], net_type='E')
     opt['path']['pretrained_netG'] = init_path_G
@@ -61,13 +58,6 @@ def main(json_path='options/train_msrresnet_psnr.json'):
     current_step = max(init_iter_G, init_iter_E, init_iter_optimizerG)
 
     border = opt['scale']
-    # --<--<--<--<--<--<--<--<--<--<--<--<--<-
-
-    # ----------------------------------------
-    # save opt to  a '../option.json' file
-    # ----------------------------------------
-    if opt['rank'] == 0:
-        option.save(opt)
 
     # ----------------------------------------
     # return None for missing key
@@ -85,12 +75,6 @@ def main(json_path='options/train_msrresnet_psnr.json'):
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
-
-    '''
-    # ----------------------------------------
-    # Step--2 (creat dataloader)
-    # ----------------------------------------
-    '''
 
     # ----------------------------------------
     # 1) create_dataset
@@ -110,7 +94,7 @@ def main(json_path='options/train_msrresnet_psnr.json'):
     '''
 
     model = define_Model(opt)
-    model.init_train()
+    model.init_train()  # load ckpt
 
     # -------------------------------
     # 6) testing
@@ -131,19 +115,18 @@ def main(json_path='options/train_msrresnet_psnr.json'):
         model.test()
 
         visuals = model.current_visuals()
-        E_img = util.tensor2uint(visuals['E'])
-        H_img = util.tensor2uint(visuals['H'])
+        E_img = util.tensor2uint(visuals['E'])  # E_img: HWC-RGB, uint8[0, 255]
+        H_img = util.tensor2uint(visuals['H'])  # H_img: HWC-RGB, uint8[0, 255]
 
         # -----------------------
         # save estimated image E
         # -----------------------
         save_img_path = os.path.join(img_dir, '{:s}_{:d}.png'.format(img_name, current_step))
-        util.imsave(E_img, save_img_path)
+        util.imsave(E_img, save_img_path)  # E_img: HWC-BGR, uint8[0, 255]
 
         # -----------------------
         # calculate PSNR
         # -----------------------
-        # current_psnr = util.calculate_psnr(E_img, H_img, border=border)
         E_img = util.bgr2ycbcr(E_img.astype(np.float32) / 255.) * 255.
         H_img = util.bgr2ycbcr(H_img.astype(np.float32) / 255.) * 255.
         current_psnry = util.calculate_psnr(E_img, H_img, border=border)
